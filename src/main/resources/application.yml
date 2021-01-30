@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: login-service
+  cloud:
+    gateway:
+      routes:
+        - id: api-gateway-service
+          uri: lb://api-gateway-service
+          predicates:
+            - Path = /products/**
