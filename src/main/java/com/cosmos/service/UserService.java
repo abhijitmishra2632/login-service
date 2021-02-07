@@ -58,4 +58,14 @@ public class UserService {
         log.info("Validating for user :"+user.toString());
 
     }
+
+    public void forgotPassword(Long username,User user) {
+        log.info("Updating password for user: "+username);
+        boolean present = checkIfUserAlreadyRegistered(user);
+        if(present){
+            User encryptedUser = encryptUser(user);
+            encryptedUser.setActive(true);
+            userRepository.save(encryptedUser);
+        }
+    }
 }

@@ -18,4 +18,9 @@ public class RegisterController {
     public String saveUserRegistration(@RequestBody User user){
         return userService.saveUserRegistration(user);
     }
+    @PutMapping("/{username}")
+    public void forgotPassword(@PathVariable Long username,@RequestBody User user){
+        userService.forgotPassword(username,user);
+    }
+
 }
