@@ -30,12 +30,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public PasswordEncoder getPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    /*@Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        //get user from db from UserService
-        //make it a custom object
-        auth.userDetailsService(userDetailsService);
-    }*/
     @Bean
     public AuthenticationProvider getAuthenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -51,9 +45,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.httpBasic()
                 .and()
                 .authorizeRequests()
-                .antMatchers("/register/**").permitAll()
-                .antMatchers("/**")
-                .authenticated()
+                .antMatchers("/user/register/**").permitAll()
+                .antMatchers("/user/login/**").authenticated()
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);

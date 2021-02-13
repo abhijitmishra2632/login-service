@@ -1,6 +1,7 @@
 package com.cosmos.filter;
 
 import com.cosmos.utility.JWTUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
+@Slf4j
 public class JWTFilter extends OncePerRequestFilter {
     @Autowired
     private JWTUtil jwtUtility;
@@ -27,22 +29,26 @@ public class JWTFilter extends OncePerRequestFilter {
         String authorization = request.getHeader("Authorization");
         String token = null;
         String username=null;
-        if(null != authorization && authorization.startsWith("Bearer ")){
-            token=authorization.substring(7);
-            username=jwtUtility.extractUsername(token);
-        }
-        if (null != username && SecurityContextHolder.getContext().getAuthentication()== null){
-            UserDetails userDetails = userService.loadUserByUsername(username);
-            if(jwtUtility.validateToken(token,userDetails)){
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,null,userDetails.getAuthorities()
-                );
-                usernamePasswordAuthenticationToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+        try{
+            if(null != authorization && authorization.startsWith("Bearer ")){
+                token=authorization.substring(7);
+                username=jwtUtility.extractUsername(token);
             }
+            if (null != username && SecurityContextHolder.getContext().getAuthentication()== null){
+                UserDetails userDetails = userService.loadUserByUsername(username);
+                if(jwtUtility.validateToken(token,userDetails)){
+                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,null,userDetails.getAuthorities()
+                    );
+                    usernamePasswordAuthenticationToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                }
+            }
+            filterChain.doFilter(request,response);
+        }catch (Exception exception){
+            log.error("JWT not able to parse:"+exception);
         }
-        filterChain.doFilter(request,response);
     }
 }
