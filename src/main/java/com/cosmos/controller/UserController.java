@@ -1,5 +1,6 @@
 package com.cosmos.controller;
 
+import com.cosmos.error.PasswordError;
 import com.cosmos.model.JWTRequest;
 import com.cosmos.model.JWTResponse;
 import com.cosmos.model.User;
@@ -7,6 +8,7 @@ import com.cosmos.service.UserService;
 import com.cosmos.utility.JWTUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -40,9 +42,13 @@ public class UserController {
     public JWTResponse authenticate(@RequestBody JWTRequest jwtRequest)throws Exception{
         log.info("Post method called...");
         UserDetails userDetails = userDetailsService.loadUserByUsername(jwtRequest.getUsername());
+        log.info("Got details"+userDetails);
+        if(userDetails==null){
+            log.info("Password Not matching");
+            throw new PasswordError("Password Not matching");
+        }
         String token = jwtUtility.generateToken(userDetails);
-
-        return new JWTResponse(token);
+        return new JWTResponse(HttpStatus.OK,token,"");
     }
     @GetMapping("/register")
     public String getRegisterPage(){
